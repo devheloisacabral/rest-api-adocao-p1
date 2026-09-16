@@ -1,0 +1,558 @@
+{
+  "info": {
+    "name": "API de Adoção de Animais",
+    "description": "Collection com todos os endpoints da API REST de adoção (`/animais`).\n\n1. Suba a API (`mvn spring-boot:run`, porta 8081).\n2. Execute **Cadastrar animal** primeiro: o `id` retornado é salvo em `animalId` e usado pelas demais requisições.\n3. Ou rode a collection inteira pelo Collection Runner, na ordem.\n\nVariáveis: `baseUrl`, `animalId` (preenchida automaticamente), `idInexistente`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Animais",
+      "item": [
+        {
+          "name": "Cadastrar animal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201 Created\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Cabeçalho Location presente\", () => pm.response.to.have.header(\"Location\"));",
+                  "const animal = pm.response.json();",
+                  "pm.test(\"Retorna id numérico\", () => pm.expect(animal.id).to.be.a(\"number\"));",
+                  "pm.collectionVariables.set(\"animalId\", animal.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animais",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais"
+              ]
+            },
+            "description": "Cadastra um animal. Retorna `201 Created`, o animal criado e o cabeçalho `Location`.\n\nObrigatórios: `nome`, `especie`, `idade` (>= 0), `sexo`, `porte`, `disponivelParaAdocao`. Opcionais: `raca`, `descricao`.\n\nO `id` retornado é salvo na variável `animalId`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Luna\",\n  \"especie\": \"Cachorro\",\n  \"raca\": \"Vira-lata\",\n  \"idade\": 3,\n  \"sexo\": \"FEMEA\",\n  \"porte\": \"MEDIO\",\n  \"descricao\": \"Dócil e vacinada\",\n  \"disponivelParaAdocao\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar animais",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Retorna um array\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/animais",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais"
+              ]
+            },
+            "description": "Lista todos os animais cadastrados. Retorna `200 OK` com um array."
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar animal por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Retorna o animal solicitado\", () => pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"animalId\"))));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/animais/{{animalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais",
+                "{{animalId}}"
+              ]
+            },
+            "description": "Consulta um animal pelo ID. Retorna `200 OK` ou `404 Not Found`."
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar animal (PUT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Nome atualizado\", () => pm.expect(pm.response.json().nome).to.eql(\"Luna Silva\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animais/{{animalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais",
+                "{{animalId}}"
+              ]
+            },
+            "description": "Substitui todos os dados do animal. Recebe os mesmos campos (e validações) do cadastro. Retorna `200 OK`, `400 Bad Request` ou `404 Not Found`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Luna Silva\",\n  \"especie\": \"Cachorro\",\n  \"raca\": \"Vira-lata\",\n  \"idade\": 3,\n  \"sexo\": \"FEMEA\",\n  \"porte\": \"MEDIO\",\n  \"descricao\": \"Dócil e vacinada\",\n  \"disponivelParaAdocao\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar campos específicos (PATCH)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 OK\", () => pm.response.to.have.status(200));",
+                  "const animal = pm.response.json();",
+                  "pm.test(\"Campos enviados alterados\", () => {",
+                  "    pm.expect(animal.idade).to.eql(4);",
+                  "    pm.expect(animal.disponivelParaAdocao).to.eql(false);",
+                  "});",
+                  "pm.test(\"Demais campos preservados\", () => pm.expect(animal.especie).to.eql(\"Cachorro\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animais/{{animalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais",
+                "{{animalId}}"
+              ]
+            },
+            "description": "Altera somente os campos enviados; os demais permanecem iguais. Campos enviados como `null` são ignorados (para limpar `raca`/`descricao` use PUT). `nome`, `especie`, `sexo` e `porte`, se enviados, não podem ficar em branco e `idade` não pode ser negativa. Retorna `200 OK`, `400 Bad Request` ou `404 Not Found`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idade\": 4,\n  \"disponivelParaAdocao\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir animal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"204 No Content\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/animais/{{animalId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais",
+                "{{animalId}}"
+              ]
+            },
+            "description": "Exclui o animal. Retorna `204 No Content` ou `404 Not Found`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cenários de erro",
+      "item": [
+        {
+          "name": "Cadastrar com dados inválidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));",
+                  "const erro = pm.response.json();",
+                  "pm.test(\"Mensagem de dados inválidos\", () => pm.expect(erro.mensagem).to.eql(\"Dados inválidos\"));",
+                  "pm.test(\"Campos inválidos informados\", () => pm.expect(erro.campos).to.have.all.keys([\"nome\", \"especie\", \"idade\", \"sexo\", \"porte\", \"disponivelParaAdocao\"]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animais",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais"
+              ]
+            },
+            "description": "Envia campos obrigatórios ausentes/inválidos. Retorna `400 Bad Request` com `campos` listando cada erro.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \" \",\n  \"especie\": null,\n  \"idade\": -1,\n  \"sexo\": \"\",\n  \"porte\": \"\",\n  \"disponivelParaAdocao\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar ID inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"404 Not Found\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Mensagem de animal não encontrado\", () => pm.expect(pm.response.json().mensagem).to.eql(\"Animal não encontrado\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/animais/{{idInexistente}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais",
+                "{{idInexistente}}"
+              ]
+            },
+            "description": "Retorna `404 Not Found`."
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar (PUT) com dados inválidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));",
+                  "const erro = pm.response.json();",
+                  "pm.test(\"Mensagem de dados inválidos\", () => pm.expect(erro.mensagem).to.eql(\"Dados inválidos\"));",
+                  "pm.test(\"Campos inválidos informados\", () => pm.expect(erro.campos).to.have.all.keys([\"nome\", \"idade\"]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animais/{{idInexistente}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais",
+                "{{idInexistente}}"
+              ]
+            },
+            "description": "Usa um ID inexistente de propósito: a validação ocorre antes da busca, então retorna `400 Bad Request`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"especie\": \"Cachorro\",\n  \"raca\": \"Vira-lata\",\n  \"idade\": -2,\n  \"sexo\": \"FEMEA\",\n  \"porte\": \"MEDIO\",\n  \"descricao\": \"Dócil e vacinada\",\n  \"disponivelParaAdocao\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar (PUT) ID inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"404 Not Found\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Mensagem de animal não encontrado\", () => pm.expect(pm.response.json().mensagem).to.eql(\"Animal não encontrado\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animais/{{idInexistente}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais",
+                "{{idInexistente}}"
+              ]
+            },
+            "description": "Retorna `404 Not Found`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Luna\",\n  \"especie\": \"Cachorro\",\n  \"raca\": \"Vira-lata\",\n  \"idade\": 3,\n  \"sexo\": \"FEMEA\",\n  \"porte\": \"MEDIO\",\n  \"descricao\": \"Dócil e vacinada\",\n  \"disponivelParaAdocao\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar (PATCH) com dados inválidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));",
+                  "const erro = pm.response.json();",
+                  "pm.test(\"Mensagem de dados inválidos\", () => pm.expect(erro.mensagem).to.eql(\"Dados inválidos\"));",
+                  "pm.test(\"Campos inválidos informados\", () => pm.expect(erro.campos).to.have.all.keys([\"nome\", \"idade\"]));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animais/{{idInexistente}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais",
+                "{{idInexistente}}"
+              ]
+            },
+            "description": "Usa um ID inexistente de propósito: a validação ocorre antes da busca, então retorna `400 Bad Request`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \" \",\n  \"idade\": -1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar (PATCH) ID inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"404 Not Found\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Mensagem de animal não encontrado\", () => pm.expect(pm.response.json().mensagem).to.eql(\"Animal não encontrado\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/animais/{{idInexistente}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais",
+                "{{idInexistente}}"
+              ]
+            },
+            "description": "Retorna `404 Not Found`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Luna Atualizada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir ID inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"404 Not Found\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Mensagem de animal não encontrado\", () => pm.expect(pm.response.json().mensagem).to.eql(\"Animal não encontrado\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/animais/{{idInexistente}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "animais",
+                "{{idInexistente}}"
+              ]
+            },
+            "description": "Retorna `404 Not Found`."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "animalId",
+      "value": ""
+    },
+    {
+      "key": "idInexistente",
+      "value": "999999"
+    }
+  ]
+}
