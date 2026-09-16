@@ -2,6 +2,19 @@
 
 API REST em Java 21 e Spring Boot para cadastrar e gerenciar animais disponíveis para adoção. Os dados são persistidos em um banco H2 local no diretório `data`.
 
+### Participantes
+- Heloisa Coelho Cabral - 202311029
+- Bernardo Cavalcanti Ribeiro Campos Duque - 202313506
+- Gabriel Fernandes de Freitas Moreira Duarte de Lima - 202310648
+
+### Funcionamento proposto
+
+- Cadastro de um animal
+- Consulta dos animais
+- Consulta de um animal pelo ID
+- Alteração de um animal
+- Exclusão de um animal.
+
 ## Executar no IntelliJ IDEA
 
 Abra o diretório como projeto Maven, aguarde a importação das dependências e execute `br.com.adocao.AdocaoApplication`. A aplicação inicia em `http://localhost:8081`.
